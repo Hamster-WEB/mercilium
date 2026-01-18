@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("loader");
   const guidesList = document.getElementById("guidesList");
   const sourcesList = document.getElementById("sourcesList");
+  const guidesSearch = document.getElementById("guidesSearch");
+  const sourcesSearch = document.getElementById("sourcesSearch");
+  let guidesData = [];
+  let sourcesData = [];
 
   // === Убираем загрузчик после старта ===
   if (loader) {
@@ -13,21 +17,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // === Получаем посты ===
+  function renderLists() {
+    const guideQuery = (guidesSearch?.value || "").trim().toLowerCase();
+    const sourceQuery = (sourcesSearch?.value || "").trim().toLowerCase();
+    const guideFiltered = guidesData.filter(p =>
+      (p.title || "").toLowerCase().includes(guideQuery)
+    );
+    const sourceFiltered = sourcesData.filter(p =>
+      (p.title || "").toLowerCase().includes(sourceQuery)
+    );
+    guidesList.innerHTML = guideFiltered.map(renderCard).join("");
+    sourcesList.innerHTML = sourceFiltered.map(renderCard).join("");
+    bindEditButtons();
+  }
+
   async function refreshPosts() {
     if (!guidesList || !sourcesList) return;
     try {
       const res = await fetch("/dbauth/pages/api/get_posts.php");
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "Ошибка API");
+      if (!data.ok) throw new Error(data.error || "API error");
 
-      guidesList.innerHTML = data.guides.map(renderCard).join("");
-      sourcesList.innerHTML = data.sources.map(renderCard).join("");
-
-      // Привязка кнопок редактирования
-      bindEditButtons();
+      guidesData = Array.isArray(data.guides) ? data.guides : [];
+      sourcesData = Array.isArray(data.sources) ? data.sources : [];
+      renderLists();
     } catch (err) {
-      console.error("Ошибка получения постов:", err);
-      guidesList.innerHTML = `<p class="error">⚠ ${err.message}</p>`;
+      console.error("Fetch posts failed:", err);
+      guidesList.innerHTML = `<p class="error">? ${err.message}</p>`;
       sourcesList.innerHTML = "";
     }
   }
@@ -72,6 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureEditors();
     openPopup(document.getElementById("popup-source"));
   });
+
+  guidesSearch?.addEventListener("input", () => renderLists());
+  sourcesSearch?.addEventListener("input", () => renderLists());
 
   refreshPosts();
 });

@@ -25,6 +25,7 @@ body {
   background: rgba(10,10,25,0.7);
   backdrop-filter: blur(8px);
   box-shadow: 0 0 20px rgba(128,0,255,0.2);
+  gap: 16px;
 }
 
 .btn {
@@ -72,8 +73,32 @@ body {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
-  padding: 20px;
+  padding: 18px;
   backdrop-filter: blur(6px);
+}
+
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.search-input {
+  flex: 0 0 220px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(160, 90, 255, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.search-input:focus {
+  border-color: rgba(210, 140, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(150, 80, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .post-card {
@@ -111,6 +136,40 @@ body {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+}
+
+@media (max-width: 1100px) {
+  .posts-section {
+    flex-direction: column;
+  }
+  .search-input {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 6%;
+  }
+  .top-bar .right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  .posts-section {
+    padding: 20px 6%;
+  }
+  .block-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .post-card {
+    padding: 14px;
+  }
 }
 
 .error {

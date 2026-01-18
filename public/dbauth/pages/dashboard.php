@@ -50,11 +50,17 @@ if (empty($_SESSION['admin_id']) || ($_SESSION['admin_role'] ?? '') !== 'admin')
 
   <section class="posts-section">
     <div class="post-block">
-      <h3>Гайды</h3>
+      <div class="block-head">
+        <h3>?????</h3>
+        <input id="guidesSearch" class="search-input" type="search" placeholder="Search guides">
+      </div>
       <div id="guidesList" class="posts-list"></div>
     </div>
     <div class="post-block">
-      <h3>Источники</h3>
+      <div class="block-head">
+        <h3>?????????</h3>
+        <input id="sourcesSearch" class="search-input" type="search" placeholder="Search sources">
+      </div>
       <div id="sourcesList" class="posts-list"></div>
     </div>
   </section>
