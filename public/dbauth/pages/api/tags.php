@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../inc/config.php';
+require_once __DIR__ . '/../../../backside/inc/config.php';
 header('Content-Type: application/json; charset=utf-8');
 
 function json_out($a){ echo json_encode($a, JSON_UNESCAPED_UNICODE); exit; }
