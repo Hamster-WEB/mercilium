@@ -55,10 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.onclick = async () => {
         if (!confirm("Удалить пост?")) return;
         const id = btn.dataset.id;
-        const fd = new FormData();
-        fd.append("action", "delete");
-        fd.append("id", id);
-        const res = await fetch("/api/posts.php", { method: "POST", body: fd });
+        const res = await fetch(`/dbauth/pages/api/posts.php?action=delete&id=${id}`);
         const data = await res.json();
         if (data.ok) refreshPosts();
         else alert("Ошибка удаления");

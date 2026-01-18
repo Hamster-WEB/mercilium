@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../../../backside/inc/config.php';
-require __DIR__ . '/../../../backside/api/upload.php';
 header('Content-Type: application/json; charset=utf-8');
 
 function json_out($arr) {

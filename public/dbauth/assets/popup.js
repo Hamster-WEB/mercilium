@@ -315,38 +315,38 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- EDIT mode ---
-  $$(".edit-post").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
-      try {
-        const res = await fetch(`/api/posts.php?action=get&id=${id}`);
-        const data = await res.json();
-        if (!data.ok) return alert("Не удалось загрузить пост");
-        ensureEditors();
+  document.addEventListener("click", async e => {
+    const btn = e.target.closest(".edit-post");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    try {
+      const res = await fetch(`/dbauth/pages/api/posts.php?action=get&id=${id}`);
+      const data = await res.json();
+      if (!data.ok) return alert("Failed to load post");
+      ensureEditors();
 
-        $("#edit-title").value = data.post.title;
-        quillEdit.root.innerHTML = data.post.content;
+      $("#edit-title").value = data.post.title;
+      quillEdit.root.innerHTML = data.post.content;
 
-        const tagsList = $("#edit-tags-list");
-        tagsList.innerHTML = "";
-        (data.post.tags || []).forEach(t => addTagToList(t, "#edit-tags-list"));
+      const tagsList = $("#edit-tags-list");
+      tagsList.innerHTML = "";
+      (data.post.tags || []).forEach(t => addTagToList(t, "#edit-tags-list"));
 
-        if (data.post.type === "guide") {
-          $("#edit-source-block").style.display = "block";
-          $("#edit-source-select").value = data.post.source_id || "";
-        } else {
-          $("#edit-source-block").style.display = "none";
-        }
-
-        $("#update-post").dataset.id = id;
-        $("#update-post").dataset.type = data.post.type;
-
-        openPopup($("#popup-edit"));
-      } catch (e) {
-        console.error(e);
-        alert("Ошибка при загрузке поста");
+      if (data.post.type === "guide") {
+        $("#edit-source-block").style.display = "block";
+        $("#edit-source-select").value = data.post.source_id || "";
+      } else {
+        $("#edit-source-block").style.display = "none";
       }
-    });
+
+      $("#update-post").dataset.id = id;
+      $("#update-post").dataset.type = data.post.type;
+
+      openPopup($("#popup-edit"));
+    } catch (e) {
+      console.error(e);
+      alert("Error loading post");
+    }
   });
 
   $("#update-post")?.addEventListener("click", () => {
