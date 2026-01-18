@@ -67,6 +67,16 @@ try {
 
         $post['tags'] = $tags;
 
+        $stmt = $pdo->prepare("
+            SELECT c.name, pc.content
+            FROM post_categories pc
+            JOIN categories c ON c.id = pc.category_id
+            WHERE pc.post_id = ?
+            ORDER BY pc.position ASC
+        ");
+        $stmt->execute([$id]);
+        $post['categories'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         if ($post['type'] === 'guide' && $post['source_id']) {
             $stmt = $pdo->prepare("SELECT id, title FROM posts WHERE id=? AND type='source'");
             $stmt->execute([$post['source_id']]);
@@ -86,14 +96,22 @@ try {
         $status = $_POST['mode'] ?? 'published';
         $tags = json_decode($_POST['tags'] ?? '[]', true);
         $source_id = ($type === 'guide' && !empty($_POST['source_id'])) ? (int)$_POST['source_id'] : null;
-        $categories = null;
+        $categoriesPayload = [];
         if ($type === 'guide' && isset($_POST['categories'])) {
             $raw = $_POST['categories'];
             $decoded = json_decode($raw, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $categories = json_encode($decoded, JSON_UNESCAPED_UNICODE);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $categoriesPayload = $decoded;
             }
         }
+        $categoryNames = [];
+        foreach ($categoriesPayload as $cat) {
+            if (!is_array($cat)) continue;
+            $name = trim($cat['name'] ?? '');
+            if ($name === '') continue;
+            $categoryNames[] = $name;
+        }
+        $categoriesJson = $categoryNames ? json_encode($categoryNames, JSON_UNESCAPED_UNICODE) : null;
 
         if ($title === '' || $content === '') {
             json_out(['ok' => false, 'error' => 'Empty title or content']);
@@ -102,11 +120,11 @@ try {
 
         if ($act === 'create') {
             $stmt = $pdo->prepare("INSERT INTO posts (title, content, type, status, source_id, categories, created_at) VALUES (?,?,?,?,?,?,NOW())");
-            $stmt->execute([$title, $content, $type, $status, $source_id, $categories]);
+            $stmt->execute([$title, $content, $type, $status, $source_id, $categoriesJson]);
             $id = $pdo->lastInsertId();
         } elseif ($act === 'update' && $id) {
             $stmt = $pdo->prepare("UPDATE posts SET title=?, content=?, type=?, status=?, source_id=?, categories=? WHERE id=?");
-            $stmt->execute([$title, $content, $type, $status, $source_id, $categories, $id]);
+            $stmt->execute([$title, $content, $type, $status, $source_id, $categoriesJson, $id]);
         } else {
             json_out(['ok' => false, 'error' => 'Unknown action']);
         }
@@ -125,6 +143,28 @@ try {
                     $tid = $pdo->lastInsertId();
                 }
                 $pdo->prepare("INSERT INTO post_tags (post_id, tag_id) VALUES (?,?)")->execute([$id, $tid]);
+            }
+        }
+
+        // --- categories ---
+        if ($type === 'guide') {
+            $pdo->prepare("DELETE FROM post_categories WHERE post_id=?")->execute([$id]);
+            $pos = 0;
+            foreach ($categoriesPayload as $cat) {
+                if (!is_array($cat)) continue;
+                $name = trim($cat['name'] ?? '');
+                if ($name === '') continue;
+                $contentCat = $cat['content'] ?? '';
+                $stmt = $pdo->prepare("SELECT id FROM categories WHERE name=?");
+                $stmt->execute([$name]);
+                $cid = $stmt->fetchColumn();
+                if (!$cid) {
+                    $pdo->prepare("INSERT INTO categories (name) VALUES (?)")->execute([$name]);
+                    $cid = $pdo->lastInsertId();
+                }
+                $pos++;
+                $stmt = $pdo->prepare("INSERT INTO post_categories (post_id, category_id, position, content) VALUES (?,?,?,?)");
+                $stmt->execute([$id, $cid, $pos, $contentCat]);
             }
         }
 

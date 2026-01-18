@@ -451,3 +451,46 @@ html, body {
     font-size: 32px;
   }
 }
+
+/* === Categories === */
+.category-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 18px 0 24px;
+}
+.category-tab {
+  border: 1px solid rgba(148, 0, 211, 0.35);
+  background: rgba(148, 0, 211, 0.12);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+.category-tab:hover {
+  background: rgba(148, 0, 211, 0.25);
+  transform: translateY(-1px);
+}
+.category-tab.active {
+  background: rgba(148, 0, 211, 0.4);
+  border-color: rgba(148, 0, 211, 0.7);
+  box-shadow: 0 0 12px rgba(148, 0, 211, 0.35);
+}
+.category-content {
+  position: relative;
+}
+.category-panel {
+  opacity: 0;
+  transform: translateY(12px);
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.5s ease;
+}
+.category-panel.active {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 2000px;
+}

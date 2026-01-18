@@ -125,7 +125,38 @@ $tags = $post ? array_filter(array_map('trim', explode(',', $post['tags'] ?? '')
   <?php endif; ?>
 
   <!-- Основной контент -->
-  <div class="content-area"><?= $post['content']; ?></div>
+  <?php
+    $categories = [];
+    if ($post['type'] === 'guide') {
+      $catStmt = $pdo->prepare("
+        SELECT c.name, pc.content
+        FROM post_categories pc
+        JOIN categories c ON c.id = pc.category_id
+        WHERE pc.post_id = ?
+        ORDER BY pc.position ASC
+      ");
+      $catStmt->execute([$post['id']]);
+      $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+  ?>
+  <?php if (!empty($categories)): ?>
+    <div class="category-switch">
+      <?php foreach ($categories as $idx => $cat): ?>
+        <button class="category-tab<?= $idx === 0 ? ' active' : '' ?>" data-index="<?= $idx ?>">
+          <?= htmlspecialchars($cat['name']); ?>
+        </button>
+      <?php endforeach; ?>
+    </div>
+    <div class="category-content">
+      <?php foreach ($categories as $idx => $cat): ?>
+        <div class="category-panel<?= $idx === 0 ? ' active' : '' ?>" data-index="<?= $idx ?>">
+          <?= $cat['content']; ?>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  <?php else: ?>
+    <div class="content-area"><?= $post['content']; ?></div>
+  <?php endif; ?>
 
  <?php
 if ($post['type'] === 'guide' && !empty($post['source_id'])) {
@@ -185,6 +216,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.15 });
 
   document.querySelectorAll('.quill-content > *').forEach(el => observer.observe(el));
+});
+</script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = Array.from(document.querySelectorAll('.category-tab'));
+  const panels = Array.from(document.querySelectorAll('.category-panel'));
+  if (!tabs.length || !panels.length) return;
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const index = tab.dataset.index;
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      panels.forEach(panel => {
+        panel.classList.toggle('active', panel.dataset.index === index);
+      });
+    });
+  });
 });
 </script>
 

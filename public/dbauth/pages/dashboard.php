@@ -78,7 +78,11 @@ if (empty($_SESSION['admin_id']) || ($_SESSION['admin_role'] ?? '') !== 'admin')
       </div>
       <div class="category-main">
         <div class="category-header">
-          <div class="category-current" id="guide-category-current">Категория 1</div>
+          <div class="category-current" id="guide-category-current">Категория не выбрана</div>
+          <div class="category-actions">
+            <button id="guide-category-select" class="btn btn-mini btn-select-category" type="button" data-scope="guide">Выбрать</button>
+            <div class="category-dropdown" id="guide-category-dropdown"></div>
+          </div>
           <div class="category-create">
             <input id="guide-category-input" type="text" placeholder="Новая категория">
             <button id="guide-category-add" class="btn btn-mini" type="button">Добавить</button>
@@ -150,7 +154,11 @@ if (empty($_SESSION['admin_id']) || ($_SESSION['admin_role'] ?? '') !== 'admin')
       </div>
       <div class="category-main">
         <div class="category-header">
-          <div class="category-current" id="edit-category-current">Категория 1</div>
+          <div class="category-current" id="edit-category-current">Категория не выбрана</div>
+          <div class="category-actions">
+            <button id="edit-category-select" class="btn btn-mini btn-select-category" type="button" data-scope="edit">Выбрать</button>
+            <div class="category-dropdown" id="edit-category-dropdown"></div>
+          </div>
           <div class="category-create">
             <input id="edit-category-input" type="text" placeholder="Новая категория">
             <button id="edit-category-add" class="btn btn-mini" type="button">Добавить</button>

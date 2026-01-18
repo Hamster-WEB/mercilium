@@ -124,7 +124,9 @@ function getCategoryElements(prefix) {
     addTab: document.getElementById(`${prefix}-category-add-tab`),
     current: document.getElementById(`${prefix}-category-current`),
     input: document.getElementById(`${prefix}-category-input`),
-    addBtn: document.getElementById(`${prefix}-category-add`)
+    addBtn: document.getElementById(`${prefix}-category-add`),
+    selectBtn: document.getElementById(`${prefix}-category-select`),
+    dropdown: document.getElementById(`${prefix}-category-dropdown`)
   };
 }
 
@@ -140,6 +142,12 @@ function getEditorContent(prefix) {
 function setEditorContent(prefix, html) {
   const editor = getEditor(prefix);
   if (editor) editor.root.innerHTML = html || "";
+}
+
+function setEditorEnabled(prefix, enabled) {
+  const editorEl = document.getElementById(`${prefix}-editor`);
+  if (!editorEl) return;
+  editorEl.classList.toggle("editor-disabled", !enabled);
 }
 
 function syncCategoryContent(prefix) {
@@ -174,19 +182,30 @@ function setActiveCategory(prefix, id) {
   renderCategoryTabs(prefix);
   const els = getCategoryElements(prefix);
   if (els.current && active) els.current.textContent = active.name;
+  if (els.current && !active) els.current.textContent = "Категория не выбрана";
+  if (els.layout) els.layout.classList.toggle("is-empty", !active);
+  setEditorEnabled(prefix, !!active);
   setEditorContent(prefix, active ? active.content : "");
 }
 
 function addCategory(prefix, name, content = "") {
   const state = categoryState[prefix];
+  const trimmed = (name || "").trim();
+  if (!trimmed) return;
+  const existing = state.categories.find(cat => cat.name === trimmed);
+  if (existing) {
+    setActiveCategory(prefix, existing.id);
+    return;
+  }
   state.counter += 1;
   const id = `${prefix}-cat-${state.counter}`;
-  const catName = name || `Категория ${state.counter}`;
+  const catName = trimmed;
   state.categories.push({ id, name: catName, content });
   setActiveCategory(prefix, id);
 }
 
-function initCategories(prefix, initialCategories) {
+function initCategories(prefix, initialCategories, options = {}) {
+  const allowEmpty = options.allowEmpty === true;
   const state = categoryState[prefix];
   state.categories = [];
   state.activeId = null;
@@ -200,7 +219,12 @@ function initCategories(prefix, initialCategories) {
     });
     setActiveCategory(prefix, state.categories[0].id);
   } else {
-    addCategory(prefix, "Категория 1", "");
+    if (allowEmpty) {
+      renderCategoryTabs(prefix);
+      setActiveCategory(prefix, null);
+    } else {
+      addCategory(prefix, "Категория 1", "");
+    }
   }
 }
 
@@ -223,7 +247,7 @@ function bindCategoryControls(prefix) {
     if (!btn) return;
     if (btn.classList.contains("category-add")) {
       const name = els.input?.value.trim() || "";
-      addCategory(prefix, name);
+      createCategory(prefix, name);
       if (els.input) els.input.value = "";
       return;
     }
@@ -232,8 +256,18 @@ function bindCategoryControls(prefix) {
 
   els.addBtn?.addEventListener("click", () => {
     const name = els.input?.value.trim() || "";
-    addCategory(prefix, name);
+    createCategory(prefix, name);
     if (els.input) els.input.value = "";
+  });
+
+  els.selectBtn?.addEventListener("click", () => {
+    if (!els.dropdown) return;
+    if (els.dropdown.style.display === "block") {
+      els.dropdown.style.display = "none";
+      return;
+    }
+    loadCategoriesList(els.dropdown, prefix);
+    els.dropdown.style.display = "block";
   });
 }
 
@@ -265,6 +299,50 @@ async function savePost({ action, id, type, title, content, tags, mode, source_i
   } catch (err) {
     console.error(err);
     alert("Ошибка сети при сохранении");
+  }
+}
+
+// --- CATEGORIES ---
+async function loadCategoriesList(dropdown, prefix) {
+  try {
+    const res = await fetch("/dbauth/pages/api/categories.php?action=list");
+    const data = await res.json();
+    if (!data.ok) return;
+    dropdown.innerHTML = "";
+    data.categories.forEach(c => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tag-option";
+      btn.textContent = `${c.name} (${c.cnt})`;
+      btn.addEventListener("click", () => {
+        addCategory(prefix, c.name);
+        dropdown.style.display = "none";
+      });
+      dropdown.appendChild(btn);
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function createCategory(prefix, name) {
+  const trimmed = (name || "").trim();
+  if (!trimmed) return;
+  try {
+    const fd = new FormData();
+    fd.append("action", "create");
+    fd.append("name", trimmed);
+    const res = await fetch("/dbauth/pages/api/categories.php", { method: "POST", body: fd });
+    const data = await res.json();
+    if (data.ok) {
+      addCategory(prefix, trimmed);
+    } else if ((data.error || "").toLowerCase().includes("already")) {
+      addCategory(prefix, trimmed);
+    } else {
+      alert("Ошибка: " + (data.error || ""));
+    }
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -314,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // openers
   $("#btnAddGuide")?.addEventListener("click", () => {
     ensureEditors();
-    if (!categoryState.guide.categories.length) initCategories("guide");
+    if (!categoryState.guide.categories.length) initCategories("guide", [], { allowEmpty: true });
     openPopup($("#popup-guide"));
   });
   $("#btnAddSource")?.addEventListener("click", () => {
@@ -380,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     const source_id = $("#guide-source-select")?.value || "";
     const categories = getCategoriesPayload("guide");
+    if (!categories || !categories.length) return alert("Добавьте категорию");
     if (!title) return alert("Введите заголовок");
     savePost({
       action: "create",
@@ -401,6 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     const source_id = $("#guide-source-select")?.value || "";
     const categories = getCategoriesPayload("guide");
+    if (!categories || !categories.length) return alert("Добавьте категорию");
     if (!title) return alert("Введите заголовок");
     savePost({
       action: "create",
@@ -506,6 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const source_id =
       type === "guide" ? $("#edit-source-select")?.value || "" : "";
     const categories = type === "guide" ? getCategoriesPayload("edit") : null;
+    if (type === "guide" && (!categories || !categories.length)) return alert("Добавьте категорию");
     if (!title) return alert("Введите заголовок");
     savePost({
       action: "update",
@@ -531,6 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const source_id =
       type === "guide" ? $("#edit-source-select")?.value || "" : "";
     const categories = type === "guide" ? getCategoriesPayload("edit") : null;
+    if (type === "guide" && (!categories || !categories.length)) return alert("Добавьте категорию");
     if (!title) return alert("Введите заголовок");
     savePost({
       action: "update",
