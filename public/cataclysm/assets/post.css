@@ -460,7 +460,7 @@ html, body {
   justify-content: center;
   margin: 18px 0 24px;
 }
-.category-tab {
+.post-content .category-tab {
   border: 1px solid rgba(148, 0, 211, 0.35);
   background: rgba(148, 0, 211, 0.12);
   color: #fff;
@@ -470,11 +470,11 @@ html, body {
   cursor: pointer;
   transition: 0.25s ease;
 }
-.category-tab:hover {
+.post-content .category-tab:hover {
   background: rgba(148, 0, 211, 0.25);
   transform: translateY(-1px);
 }
-.category-tab.active {
+.post-content .category-tab.active {
   background: rgba(148, 0, 211, 0.4);
   border-color: rgba(148, 0, 211, 0.7);
   box-shadow: 0 0 12px rgba(148, 0, 211, 0.35);
@@ -483,14 +483,13 @@ html, body {
   position: relative;
 }
 .category-panel {
+  display: none;
   opacity: 0;
   transform: translateY(12px);
-  max-height: 0;
-  overflow: hidden;
-  transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.5s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 .category-panel.active {
+  display: block;
   opacity: 1;
   transform: translateY(0);
-  max-height: 2000px;
 }

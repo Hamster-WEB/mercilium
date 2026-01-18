@@ -86,6 +86,7 @@ if (empty($_SESSION['admin_id']) || ($_SESSION['admin_role'] ?? '') !== 'admin')
           <div class="category-create">
             <input id="guide-category-input" type="text" placeholder="Новая категория">
             <button id="guide-category-add" class="btn btn-mini" type="button">Добавить</button>
+            <button id="guide-category-remove" class="btn btn-mini btn-remove-category" type="button">Убрать</button>
           </div>
         </div>
         <div id="guide-editor" class="editor"></div>
@@ -162,6 +163,7 @@ if (empty($_SESSION['admin_id']) || ($_SESSION['admin_role'] ?? '') !== 'admin')
           <div class="category-create">
             <input id="edit-category-input" type="text" placeholder="Новая категория">
             <button id="edit-category-add" class="btn btn-mini" type="button">Добавить</button>
+            <button id="edit-category-remove" class="btn btn-mini btn-remove-category" type="button">Убрать</button>
           </div>
         </div>
         <div id="edit-editor" class="editor"></div>

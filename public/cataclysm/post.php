@@ -149,7 +149,7 @@ $tags = $post ? array_filter(array_map('trim', explode(',', $post['tags'] ?? '')
     </div>
     <div class="category-content">
       <?php foreach ($categories as $idx => $cat): ?>
-        <div class="category-panel<?= $idx === 0 ? ' active' : '' ?>" data-index="<?= $idx ?>">
+        <div class="category-panel quill-content<?= $idx === 0 ? ' active' : '' ?>" data-index="<?= $idx ?>">
           <?= $cat['content']; ?>
         </div>
       <?php endforeach; ?>

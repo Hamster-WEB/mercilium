@@ -125,6 +125,7 @@ function getCategoryElements(prefix) {
     current: document.getElementById(`${prefix}-category-current`),
     input: document.getElementById(`${prefix}-category-input`),
     addBtn: document.getElementById(`${prefix}-category-add`),
+    removeBtn: document.getElementById(`${prefix}-category-remove`),
     selectBtn: document.getElementById(`${prefix}-category-select`),
     dropdown: document.getElementById(`${prefix}-category-dropdown`)
   };
@@ -177,7 +178,7 @@ function renderCategoryTabs(prefix) {
 function setActiveCategory(prefix, id) {
   const state = categoryState[prefix];
   syncCategoryContent(prefix);
-  state.activeId = id;
+  state.activeId = id || null;
   const active = state.categories.find(c => c.id === id);
   renderCategoryTabs(prefix);
   const els = getCategoryElements(prefix);
@@ -202,6 +203,21 @@ function addCategory(prefix, name, content = "") {
   const catName = trimmed;
   state.categories.push({ id, name: catName, content });
   setActiveCategory(prefix, id);
+}
+
+function removeActiveCategory(prefix) {
+  const state = categoryState[prefix];
+  if (!state.activeId) return;
+  const idx = state.categories.findIndex(cat => cat.id === state.activeId);
+  if (idx === -1) return;
+  state.categories.splice(idx, 1);
+  if (state.categories.length) {
+    const next = state.categories[Math.min(idx, state.categories.length - 1)];
+    setActiveCategory(prefix, next.id);
+  } else {
+    setActiveCategory(prefix, null);
+    renderCategoryTabs(prefix);
+  }
 }
 
 function initCategories(prefix, initialCategories, options = {}) {
@@ -247,8 +263,13 @@ function bindCategoryControls(prefix) {
     if (!btn) return;
     if (btn.classList.contains("category-add")) {
       const name = els.input?.value.trim() || "";
-      createCategory(prefix, name);
-      if (els.input) els.input.value = "";
+      if (name) {
+        createCategory(prefix, name);
+        if (els.input) els.input.value = "";
+      } else if (els.dropdown) {
+        loadCategoriesList(els.dropdown, prefix);
+        els.dropdown.style.display = "block";
+      }
       return;
     }
     if (btn.dataset.id) setActiveCategory(prefix, btn.dataset.id);
@@ -258,6 +279,10 @@ function bindCategoryControls(prefix) {
     const name = els.input?.value.trim() || "";
     createCategory(prefix, name);
     if (els.input) els.input.value = "";
+  });
+
+  els.removeBtn?.addEventListener("click", () => {
+    removeActiveCategory(prefix);
   });
 
   els.selectBtn?.addEventListener("click", () => {
