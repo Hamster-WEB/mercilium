@@ -27,6 +27,19 @@ body {
   box-shadow: 0 0 20px rgba(128,0,255,0.2);
   gap: 16px;
 }
+.top-bar .left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.top-bar .left h2 {
+  margin: 0;
+}
+.top-bar .subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.2px;
+}
 
 .btn {
   padding: 10px 20px;
@@ -85,10 +98,13 @@ body {
   margin-bottom: 12px;
 }
 
+.search-bar {
+  padding: 16px 5% 0;
+}
 .search-input {
-  flex: 0 0 220px;
-  padding: 9px 12px;
-  border-radius: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
   border: 1px solid rgba(160, 90, 255, 0.45);
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
@@ -141,10 +157,6 @@ body {
 @media (max-width: 1100px) {
   .posts-section {
     flex-direction: column;
-  }
-  .search-input {
-    flex: 1 1 auto;
-    width: 100%;
   }
 }
 

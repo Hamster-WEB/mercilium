@@ -2,12 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("loader");
   const guidesList = document.getElementById("guidesList");
   const sourcesList = document.getElementById("sourcesList");
-  const guidesSearch = document.getElementById("guidesSearch");
-  const sourcesSearch = document.getElementById("sourcesSearch");
+  const globalSearch = document.getElementById("globalSearch");
   let guidesData = [];
   let sourcesData = [];
 
-  // === Убираем загрузчик после старта ===
   if (loader) {
     setTimeout(() => {
       loader.style.opacity = "0";
@@ -16,16 +14,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1800);
   }
 
-  // === Получаем посты ===
+  function matchesQuery(p, query) {
+    if (!query) return true;
+    const title = (p.title || "").toLowerCase();
+    const tags = (p.tags || "").toLowerCase();
+    return title.includes(query) || tags.includes(query);
+  }
+
   function renderLists() {
-    const guideQuery = (guidesSearch?.value || "").trim().toLowerCase();
-    const sourceQuery = (sourcesSearch?.value || "").trim().toLowerCase();
-    const guideFiltered = guidesData.filter(p =>
-      (p.title || "").toLowerCase().includes(guideQuery)
-    );
-    const sourceFiltered = sourcesData.filter(p =>
-      (p.title || "").toLowerCase().includes(sourceQuery)
-    );
+    const query = (globalSearch?.value || "").trim().toLowerCase();
+    const guideFiltered = guidesData.filter(p => matchesQuery(p, query));
+    const sourceFiltered = sourcesData.filter(p => matchesQuery(p, query));
+
     guidesList.innerHTML = guideFiltered.map(renderCard).join("");
     sourcesList.innerHTML = sourceFiltered.map(renderCard).join("");
     bindEditButtons();
@@ -36,13 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await fetch("/dbauth/pages/api/get_posts.php");
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "API error");
+      if (!data.ok) throw new Error(data.error || "?????? API");
 
       guidesData = Array.isArray(data.guides) ? data.guides : [];
       sourcesData = Array.isArray(data.sources) ? data.sources : [];
       renderLists();
     } catch (err) {
-      console.error("Fetch posts failed:", err);
+      console.error("?????? ???????? ??????:", err);
       guidesList.innerHTML = `<p class="error">? ${err.message}</p>`;
       sourcesList.innerHTML = "";
     }
@@ -52,34 +52,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const tags = (p.tags || "")
       .split(",")
       .map(t => `<span class="tag">#${t.trim()}</span>`)
-      .join(" ");
+      .join(" " );
     return `
       <div class="post-card">
-        <h4>${p.title || "Без названия"}</h4>
+        <h4>${p.title || "??? ????????"}</h4>
         <div class="tags">${tags}</div>
         <p class="date">${new Date(p.created_at).toLocaleString("ru-RU")}</p>
         <div class="actions">
-          <button class="edit-post" data-id="${p.id}">✏️ Редактировать</button>
-          <button class="delete-post" data-id="${p.id}">🗑 Удалить</button>
+          <button class="edit-post" data-id="${p.id}">?????????????</button>
+          <button class="delete-post" data-id="${p.id}">???????</button>
         </div>
       </div>`;
   }
 
-  // === Удаление поста ===
   function bindEditButtons() {
     document.querySelectorAll(".delete-post").forEach(btn => {
       btn.onclick = async () => {
-        if (!confirm("Удалить пост?")) return;
+        if (!confirm("??????? ?????")) return;
         const id = btn.dataset.id;
         const res = await fetch(`/dbauth/pages/api/posts.php?action=delete&id=${id}`);
         const data = await res.json();
         if (data.ok) refreshPosts();
-        else alert("Ошибка удаления");
+        else alert("?????? ????????");
       };
     });
   }
 
-  // === Добавление нового ===
   document.getElementById("btnAddGuide")?.addEventListener("click", () => {
     ensureEditors();
     openPopup(document.getElementById("popup-guide"));
@@ -89,8 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     openPopup(document.getElementById("popup-source"));
   });
 
-  guidesSearch?.addEventListener("input", () => renderLists());
-  sourcesSearch?.addEventListener("input", () => renderLists());
+  globalSearch?.addEventListener("input", () => renderLists());
 
   refreshPosts();
 });
