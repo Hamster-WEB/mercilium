@@ -40,29 +40,29 @@ if (empty($_SESSION['admin_id']) || ($_SESSION['admin_role'] ?? '') !== 'admin')
   <header class="top-bar">
     <div class="left">
       <h2>Mercilium Admin</h2>
-      <span class="subtitle">?????? ??????????</span>
+      <span class="subtitle">Панель управления</span>
     </div>
     <div class="right">
-      <button id="btnAddGuide" class="btn violet">+ ????</button>
-      <button id="btnAddSource" class="btn">+ ????????</button>
-      <a href="/dbauth/pages/logout.php" class="logout-btn">?????</a>
+      <button id="btnAddGuide" class="btn violet">+ Гайд</button>
+      <button id="btnAddSource" class="btn">+ Источник</button>
+      <a href="/dbauth/pages/logout.php" class="logout-btn">Выйти</a>
     </div>
   </header>
 
   <div class="search-bar">
-    <input id="globalSearch" class="search-input" type="search" placeholder="????? ?? ???????? ? ?????">
+    <input id="globalSearch" class="search-input" type="search" placeholder="Поиск по гайдам и источникам">
   </div>
 
   <section class="posts-section">
     <div class="post-block">
       <div class="block-head">
-        <h3>?????</h3>
+        <h3>Гайды</h3>
       </div>
       <div id="guidesList" class="posts-list"></div>
     </div>
     <div class="post-block">
       <div class="block-head">
-        <h3>?????????</h3>
+        <h3>Источники</h3>
       </div>
       <div id="sourcesList" class="posts-list"></div>
     </div>

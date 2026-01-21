@@ -1941,6 +1941,51 @@ input[type=number] {
   gap: 8px;
 }
 
+.vlan-label{
+  display:block;
+  margin: 4px 0 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.vlan-select{
+  flex: 1 1 auto;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border: 1px solid var(--border);
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.vlan-custom-name{ margin-top: 8px; }
+
+.vlan-custom-name input{
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border: 1px solid var(--border);
+  outline: none;
+}
+
+.vlan-custom-name input::placeholder{ color:#a9a3c0; }
+
+.vlan-select:focus,
+.vlan-custom-name input:focus{
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167,139,250,.25);
+}
+
+.vlan-edit-pane .vlan-custom-name{ margin-top: 10px; }
+.vlan-edit-pane .vlan-row{ margin-top: 10px; }
+
 .vlan-cube {
   width: 28px;
   height: 28px;
